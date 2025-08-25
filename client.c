@@ -49,30 +49,31 @@ char *chartobin(unsigned char c)
 }
 
 
-char *atobin(char *argv)
-{
-	char *binchar;
-	char *binstr;
-	char *tmp;
+// char *atobin(char *argv)
+// {
+// 	char *binchar;
+// 	char *binstr;
+// 	char *tmp;
 
-	binstr = ft_strdup("");
-	while (*argv)
-	{
-		binchar = chartobin(*argv);
-		tmp = binstr;
-		binstr = ft_strjoin(tmp, binchar);
-		free(tmp);
-		free(binchar);
-		argv++;
-	}
-	return (binstr);
-}
+// 	binstr = ft_strdup("");
+// 	while (*argv)
+// 	{
+// 		binchar = chartobin(*argv);
+// 		tmp = binstr;
+// 		binstr = ft_strjoin(tmp, binchar);
+// 		free(tmp);
+// 		free(binchar);
+// 		argv++;
+// 	}
+// 	return (binstr);
+// }
 
 int main(int argc, char  ** argv)
 {
 	int server_pid;
-	char *binstr;
+	char *binchar;
 	int i;
+    int j;
 
 	if (argc != 3)
 		return (-1); // handle err.  Terminate server?
@@ -84,25 +85,33 @@ int main(int argc, char  ** argv)
 	if (argv[2][0] == '\0')
 		return (-1);
 	// encrypt message
-	binstr = atobin(argv[2]);
+	//binstr = atobin(argv[2]);
 	//ft_printf("%s\n", binstr);
 	// send message
-	i = 0;
-	while (binstr[i])
-	{
-		if (binstr[i] == '0')
-			kill(server_pid, SIGUSR2);
-		else if (binstr[i] == '1')
-			kill(server_pid, SIGUSR1);
-		usleep(100);
-		i++;
-	}
+    i = 0;
+    while (argv[2][i])
+    {
+        binchar = chartobin(argv[2][i]);
+        if (!binchar)
+            return (-1);
+        j = 0;
+        while (binchar[j])
+        {
+            if (binchar[j] == '0')
+                kill(server_pid, SIGUSR2);
+            else if (binchar[j] == '1')
+                kill(server_pid, SIGUSR1);
+            usleep(100);
+            j++;
+        }
+        free(binchar);
+        i++;
+    }
 	i = 0;
 	while (i++ < 8)
 	{
 		kill(server_pid, SIGUSR2); // send null terminator 00000000
 		usleep(100);
 	}
-	free(binstr);
 	return (0);
 }
