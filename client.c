@@ -19,15 +19,15 @@ int power(int num, int exp)
 	return (factor);
 }
 
-char *chartobin(unsigned char c)
+char *chartobin(unsigned char c, int server_pid)
 {
 	char *charstr;
 	int num;
 	int i;
 
-	charstr = ft_calloc(1, 8);
-	if (!charstr)
-		return (NULL); // handle error!
+	// charstr = ft_calloc(1, 9);
+	// if (!charstr)
+	// 	return (NULL); // handle error!
 	num = (int)c;
 	i = 7;
 	while (i >= 1)
@@ -35,14 +35,15 @@ char *chartobin(unsigned char c)
 		if (num >= power(2, i))
 		{
 			num = num - power(2, i);
-			charstr[7 - i] = '1'; 
+			kill(server_pid, SIGUSR1);
 		}
 		else
-			charstr[7 - i] = '0';
+			kill(server_pid, SIGUSR2);
+			//charstr[7 - i] = '0';
 		i--;
 	}
 	if (num == 0)
-		charstr[7] = '0';
+		kill(server_pid, SIGUSR2);//charstr[7] = '0';
 	else
 		charstr[7] = '1';
 	return (charstr);
@@ -101,7 +102,7 @@ int main(int argc, char  ** argv)
                 kill(server_pid, SIGUSR2);
             else if (binchar[j] == '1')
                 kill(server_pid, SIGUSR1);
-            usleep(100);
+            usleep(1000);
             j++;
         }
         free(binchar);
@@ -111,7 +112,7 @@ int main(int argc, char  ** argv)
 	while (i++ < 8)
 	{
 		kill(server_pid, SIGUSR2); // send null terminator 00000000
-		usleep(100);
+		usleep(1000);
 	}
 	return (0);
 }
