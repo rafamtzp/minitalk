@@ -1,14 +1,26 @@
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <errno.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ramarti2 <ramarti2@student.42malaga.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/26 15:08:28 by ramarti2          #+#    #+#             */
+/*   Updated: 2025/08/26 15:08:36 by ramarti2         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "libft/libft.h"
 #include "printf/ft_printf.h"
+#include <errno.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-int power(int num, int exp)
+int	power(int num, int exp)
 {
-	int factor;
+	int	factor;
 
 	factor = 1;
 	while (exp > 0)
@@ -19,18 +31,14 @@ int power(int num, int exp)
 	return (factor);
 }
 
-char *chartobin(unsigned char c, int server_pid)
+void	chartobin(unsigned char c, int server_pid)
 {
-	char *charstr;
-	int num;
-	int i;
+	int	num;
+	int	i;
 
-	// charstr = ft_calloc(1, 9);
-	// if (!charstr)
-	// 	return (NULL); // handle error!
 	num = (int)c;
 	i = 7;
-	while (i >= 1)
+	while (i >= 0)
 	{
 		if (num >= power(2, i))
 		{
@@ -39,80 +47,28 @@ char *chartobin(unsigned char c, int server_pid)
 		}
 		else
 			kill(server_pid, SIGUSR2);
-			//charstr[7 - i] = '0';
 		i--;
+		usleep(300);
 	}
-	if (num == 0)
-		kill(server_pid, SIGUSR2);//charstr[7] = '0';
-	else
-		charstr[7] = '1';
-	return (charstr);
 }
 
-
-// char *atobin(char *argv)
-// {
-// 	char *binchar;
-// 	char *binstr;
-// 	char *tmp;
-
-// 	binstr = ft_strdup("");
-// 	while (*argv)
-// 	{
-// 		binchar = chartobin(*argv);
-// 		tmp = binstr;
-// 		binstr = ft_strjoin(tmp, binchar);
-// 		free(tmp);
-// 		free(binchar);
-// 		argv++;
-// 	}
-// 	return (binstr);
-// }
-
-int main(int argc, char  ** argv)
+int	main(int argc, char **argv)
 {
-	int server_pid;
-	char *binchar;
-	int i;
-    int j;
+	int	server_pid;
+	int	i;
 
 	if (argc != 3)
-		return (-1); // handle err.  Terminate server?
-	// check that PID exists
+		return (-1);
 	server_pid = ft_atoi(argv[1]);
 	if (kill(server_pid, 0) == -1 && errno == ESRCH)
 		return (-1);
-	// check that message is nonempty
 	if (argv[2][0] == '\0')
 		return (-1);
-	// encrypt message
-	//binstr = atobin(argv[2]);
-	//ft_printf("%s\n", binstr);
-	// send message
-    i = 0;
-    while (argv[2][i])
-    {
-        binchar = chartobin(argv[2][i]);
-        if (!binchar)
-            return (-1);
-        j = 0;
-        while (binchar[j])
-        {
-            if (binchar[j] == '0')
-                kill(server_pid, SIGUSR2);
-            else if (binchar[j] == '1')
-                kill(server_pid, SIGUSR1);
-            usleep(1000);
-            j++;
-        }
-        free(binchar);
-        i++;
-    }
 	i = 0;
-	while (i++ < 8)
+	while (argv[2][i])
 	{
-		kill(server_pid, SIGUSR2); // send null terminator 00000000
-		usleep(1000);
+		chartobin(argv[2][i], server_pid);
+		i++;
 	}
 	return (0);
 }
