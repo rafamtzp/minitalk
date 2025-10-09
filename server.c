@@ -6,24 +6,16 @@
 /*   By: ramarti2 <ramarti2@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 15:08:21 by ramarti2          #+#    #+#             */
-/*   Updated: 2025/08/26 15:08:23 by ramarti2         ###   ########.fr       */
+/*   Updated: 2025/09/02 15:43:35 by ramarti2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft/libft.h"
 #include "printf/ft_printf.h"
 #include <signal.h>
-#include <stdlib.h>
 #include <unistd.h>
 
-int		lastsignal;
-
-void	sighandler(int signum)
-{
-	lastsignal = signum;
-}
-
-int	power(int num, int exp)
+static int	power(int num, int exp)
 {
 	int	factor;
 
@@ -36,28 +28,55 @@ int	power(int num, int exp)
 	return (factor);
 }
 
-int	main(void)
+static void	confirm_eom(int *msg_printed, int *i, siginfo_t *info)
 {
-	int		pid;
-	char	c;
-	int		i;
+	*i = 0;
+	*msg_printed = 0;
+	write(1, "\n", 1);
+	kill(info->si_pid, SIGUSR2);
+}
 
-	pid = getpid();
-	ft_printf("%i\n", pid);
-	signal(SIGUSR1, sighandler);
-	signal(SIGUSR2, sighandler);
-	while (1)
+static void	sighandler(int signum, siginfo_t *info, void *context)
+{
+	static int				i = 0;
+	static unsigned char	c = 0;
+	static int				msg_printed = 0;
+
+	(void)context;
+	if (msg_printed == 0)
+		ft_printf("Client:");
+	msg_printed = 1;
+	if (i < 8)
 	{
+		if (signum == SIGUSR1)
+			c += power(2, 7 - i);
+		i++;
+	}
+	if (c != 0 && i == 8)
+	{
+		write(1, &c, 1);
 		i = 0;
 		c = 0;
-		while (i < 8)
-		{
-			pause();
-			if (lastsignal == SIGUSR1)
-				c += power(2, 7 - i);
-			i++;
-		}
-		if (c != 0)
-			write(1, &c, 1);
+	}
+	kill(info->si_pid, SIGUSR1);
+	if (c == 0 && i == 8)
+		confirm_eom(&msg_printed, &i, info);
+}
+
+int	main(void)
+{
+	int					pid;
+	struct sigaction	action;
+
+	action.sa_sigaction = sighandler;
+	sigemptyset(&action.sa_mask);
+	action.sa_flags = SA_SIGINFO;
+	pid = getpid();
+	ft_printf("Server PID: %i\n", pid);
+	sigaction(SIGUSR1, &action, NULL);
+	sigaction(SIGUSR2, &action, NULL);
+	while (1)
+	{
+		sleep(1);
 	}
 }

@@ -35,7 +35,7 @@ clean:
 	@make -C $(LIBFT_DIR) clean
 	@make -C $(PRINTF_DIR) clean
 
-fclean:
+fclean: clean
 	rm -f $(NAME_CLIENT) $(NAME_SERVER)
 	@make -C $(LIBFT_DIR) fclean
 	@make -C $(PRINTF_DIR) fclean
