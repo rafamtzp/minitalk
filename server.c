@@ -6,7 +6,7 @@
 /*   By: ramarti2 <ramarti2@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 15:08:21 by ramarti2          #+#    #+#             */
-/*   Updated: 2025/09/02 15:43:35 by ramarti2         ###   ########.fr       */
+/*   Updated: 2026/04/01 17:11:30 by ramarti2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ static void	sighandler(int signum, siginfo_t *info, void *context)
 
 	(void)context;
 	if (msg_printed == 0)
-		ft_printf("Client:");
+		ft_printf("Client: ");
 	msg_printed = 1;
 	if (i < 8)
 	{
